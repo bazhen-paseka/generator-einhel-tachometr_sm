@@ -8,39 +8,21 @@
 * \copyright	bazhen.paseka@gmail.com
 *************************************************************************************
 */
-/*
-********************************************************************************
-* Company Name
-* Company Address
-* City, State ZIP
-* Country
-*
-* (c) Copyright YYYY, Company Name, City, State
-*
-* All rights reserved. Company Name’s source code is an unpublished work and the
-* use of a copyright notice does not imply otherwise. This source code contains
-* confidential, trade secret material of Micrium, Inc. Any attempt or
-* participation in deciphering, decoding, reverse engineering or in any way
-* altering the source code is strictly prohibited, unless the prior written
-* consent of Company Name is obtained.
-*
-* Filename :
-* Programmer(s): Joe Programmer (JP)
-* John Doe (JD)
-* Created : YYYY/MM/DD
-* Description :
-********************************************************************************
-*/
 
-#ifndef _H_
-#define _H_
+#ifndef GENERATOR_EINHEL_TACHOMETR_SM_INCLUDED_H_
+#define GENERATOR_EINHEL_TACHOMETR_SM_INCLUDED_H_
 
 /*
 **************************************************************************
 *								INCLUDE FILES
 **************************************************************************
 */
-
+	#include "main.h"
+	#include "tim.h"
+	#include "local_config.h"
+	#include "tm1637_sm.h"
+	#include "debug_gx.h"
+	#include "generator-einhel-tachometr_sm.h"
 /*
 **************************************************************************
 *								    DEFINES                     
@@ -70,10 +52,11 @@
 *                              FUNCTION PROTOTYPES
 **************************************************************************
 */
-
+	void Tachometr_Init (void);
+	void Tachometr_Main (void);
 /*
 **************************************************************************
 *                              		END
 **************************************************************************
 */
-#endif /* _H_ */
+#endif /* GENERATOR_EINHEL_TACHOMETR_SM_INCLUDED_H_ */

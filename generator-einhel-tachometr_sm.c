@@ -8,36 +8,13 @@
 * \copyright	bazhen.paseka@gmail.com
 *************************************************************************************
 */
-/*
-********************************************************************************
-* Company Name
-* Company Address
-* City, State ZIP
-* Country
-*
-* (c) Copyright YYYY, Company Name, City, State
-*
-* All rights reserved. Company Name’s source code is an unpublished work and the
-* use of a copyright notice does not imply otherwise. This source code contains
-* confidential, trade secret material of Micrium, Inc. Any attempt or
-* participation in deciphering, decoding, reverse engineering or in any way
-* altering the source code is strictly prohibited, unless the prior written
-* consent of Company Name is obtained.
-*
-* Filename :
-* Programmer(s): Joe Programmer (JP)
-* John Doe (JD)
-* Created : YYYY/MM/DD
-* Description :
-********************************************************************************
-*/
 
 /*
 **************************************************************************
 *							INCLUDE FILES
 **************************************************************************
 */
-
+	#include "generator-einhel-tachometr_sm.h"
 /*
 **************************************************************************
 *							LOCAL DEFINES
@@ -73,7 +50,9 @@
 *						 LOCAL GLOBAL VARIABLES
 **************************************************************************
 */
-
+	uint8_t 	display_update_ext	= 0 ;
+	uint32_t	tacho_value_u32		= 0 ;
+	tm1637_struct 	htm1637;
 /*
 **************************************************************************
 *                        LOCAL FUNCTION PROTOTYPES
@@ -86,11 +65,60 @@
 **************************************************************************
 */
 
+void Tachometr_Init (void) {
+	DebugSoftVersion(SOFT_VERSION);
+	DBG1("\t Debug: UART1 / 62500\r\n");
+	htm1637.clk_port = TM1637_CLK_GPIO_Port;
+	htm1637.clk_pin  = TM1637_CLK_Pin;
+	htm1637.dio_port = TM1637_DIO_GPIO_Port;
+	htm1637.dio_pin  = TM1637_DIO_Pin;
+	TM1637_Init( &htm1637 );
+	TM1637_Set_Brightness( &htm1637, bright_full);
+	TM1637_Display_Decimal( &htm1637, SOFT_VERSION, no_double_dot, symbol_dec);
+	HAL_Delay(1000);
+
+	TIM3->CNT = 0 ;
+	HAL_TIM_Base_Start_IT( &TIM_TACHO ) ;
+	DBG1("\t End Init.\r\n\r\n");
+} //******************************************************************
+
+void Tachometr_Main (void) {
+	if (display_update_ext == 1) {
+		if ( tacho_value_u32 < 3500 ) {
+			tacho_value_u32 = (60 * 1000 * 100)/tacho_value_u32 ;
+			TM1637_Display_Decimal( &htm1637, tacho_value_u32, no_double_dot, symbol_dec);
+			DBG1(" value = %lu\r\n", tacho_value_u32);
+			HAL_Delay(200);
+		}
+		display_update_ext = 0;
+	}
+} //******************************************************************
+
 /*
 **************************************************************************
 *                           LOCAL FUNCTIONS
 **************************************************************************
 */
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	if ( GPIO_Pin == BUTTON_Pin ) {
+		uint32_t tim3_current_u32 = TIM3->CNT ;
+		if ( tim3_current_u32 > 400 ) {
+			TIM3->CNT = 0 ;
+			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+			tacho_value_u32 = tim3_current_u32 ;
+			display_update_ext = 1 ;
+		}
+	}
+} //**************************************************************************
+
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+//	if ( htim == &TIM_TACHO) {
+//		tacho_value_u32 = 65535;
+//		display_update_tim = 1 ;
+//	}
+//} //**************************************************************************
+
 /*
 **************************************************************************
 *                             	END
